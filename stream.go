@@ -29,9 +29,18 @@ func (s *Stream) NextTweet() (tweet *Status, err error) {
 		if err != nil {
 			return nil, err
 		}
-		if err = json.Unmarshal(bytes, &tweet); err != nil {
-			log.Println(string(bytes))
-			return nil, err
+		err = json.Unmarshal(bytes, &tweet)
+
+		if err != nil {
+			event := new(Event)
+			err = json.Unmarshal(bytes, &event)
+
+			if err != nil {
+				log.Println(string(bytes))
+				return nil, err
+			} else {
+				log.Println(event.Event + " event accepted!")
+			}
 		}
 		if tweet.Id > 0 {
 			return tweet, nil
