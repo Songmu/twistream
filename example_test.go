@@ -1,11 +1,11 @@
 package twistream_test
 
-import "github.com/otiai10/twistream"
+import "github.com/Songmu/twistream"
 import "testing"
 import "fmt"
 
 func ExampleTimeline_Listen(t *testing.T) {
-	timeline, _ := twistream.New(
+	timeline := twistream.New(
 		"https://userstream.twitter.com/1.1/user.json",
 		"CONSUMER_KEY",
 		"CONSUMER_SECRET",
@@ -14,8 +14,15 @@ func ExampleTimeline_Listen(t *testing.T) {
 		map[string]string{},
 	)
 	// Practically, you would run this loop by goroutine
+
+	ch, err := timeline.Listen()
+
+	if err != nil {
+		panic(err)
+	}
+
 	for {
-		status := <-timeline.Listen()
+		status := <-ch
 		fmt.Println(status)
 	}
 }

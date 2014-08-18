@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Songmu/twistream"
 	. "github.com/otiai10/mint"
-	"github.com/otiai10/twistream"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 )
 
 func TestNew(t *testing.T) {
-	timeline, e := twistream.New(
+	timeline := twistream.New(
 		"https://userstream.twitter.com/1.1/user.json",
 		CONSUMER_KEY,
 		CONSUMER_SECRET,
@@ -28,14 +28,15 @@ func TestNew(t *testing.T) {
 		ACCESS_TOKEN_SECRET,
 		map[string]string{},
 	)
-	Expect(t, e).ToBe(nil)
 	Expect(t, timeline).TypeOf("*twistream.Timeline")
 
-	var terminate = make(chan bool)
+	ch, e := timeline.Listen()
+	Expect(t, e).ToBe(nil)
 
+	var terminate = make(chan bool)
 	go func() {
 		for {
-			status := <-timeline.Listen()
+			status := <-ch
 			fmt.Printf("%+v\n", status)
 			terminate <- true
 			break
@@ -48,7 +49,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestTimeline_Tweet(t *testing.T) {
-	timeline, _ := twistream.New(
+	timeline := twistream.New(
 		"https://userstream.twitter.com/1.1/user.json",
 		CONSUMER_KEY,
 		CONSUMER_SECRET,
