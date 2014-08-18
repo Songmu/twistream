@@ -1,21 +1,26 @@
-# Twitter Streaming API [![GoDoc](https://godoc.org/github.com/otiai10/twistream?status.svg)](https://godoc.org/github.com/otiai10/twistream)
+# Twitter Streaming API
 
 The very simplest interface to use Twitter Streaming API by golang.
+This is forked from <https://github.com/otiai10/twistream>.
 
 # Usage
 
 ```go
-timeline, _ := twistream.New(
+timeline := twistream.New(
     "https://userstream.twitter.com/1.1/user.json",
     CONSUMERKEY,
     CONSUMERSECRET,
     ACCESSTOKEN,
     ACCESSTOKENSECRET,
+    map[string]string{
+        with: "followers",
+    },
 )
 
 // Listen timeline
+ch, _ := timeline.Listen()
 for {
-    status := <-timeline.Listen()
+    status := <-ch
     fmt.Println(status)
 }
 
