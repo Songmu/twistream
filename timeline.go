@@ -1,14 +1,18 @@
 package twistream
 
-import "net/http"
-import "regexp"
+import (
+	"bufio"
+	"log"
+	"net/http"
+)
 
 type Timeline struct {
-	response *http.Response
-	stream   chan Status
-	client   *api
-	endpoint string
-	params   map[string]string
+	response    *http.Response
+	tweets_chan chan *Status
+	client      *api
+	endpoint    string
+	params      map[string]string
+	stream      *Stream
 }
 
 // New provides new reference for specified Timeline.
@@ -32,24 +36,31 @@ func (tl *Timeline) Init() (e error) {
 		tl.params,
 	)
 	tl.response = response
-	tl.stream = make(chan Status)
+	tl.stream = &Stream{
+		scanner: bufio.NewScanner(response.Body),
+	}
+
 	return e
 }
 
 // Listen bytes sent from Twitter Streaming API
 // and send completed status to the channel.
-func (tl *Timeline) Listen() <-chan Status {
+func (tl *Timeline) Listen() <-chan *Status {
 	// Delegate channel to parser.
-	p := &parser{
-		proxy:   tl.stream,
-		trigger: regexp.MustCompile("^[0-9a-z]+\r\n$"),
-	}
+
+	tl.tweets_chan = make(chan *Status)
+
 	go func() {
 		for {
-			tl.response.Write(p)
+			tweet, err := tl.stream.NextTweet()
+			if err != nil {
+				log.Fatal(err)
+			}
+			tl.tweets_chan <- tweet
 		}
 	}()
-	return tl.stream
+
+	return tl.tweets_chan
 }
 
 // Tweet posts status to the timeline
