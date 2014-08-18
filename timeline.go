@@ -3,16 +3,13 @@ package twistream
 import (
 	"bufio"
 	"log"
-	"net/http"
 )
 
 type Timeline struct {
-	response    *http.Response
-	tweets_chan chan *Status
-	client      *api
-	endpoint    string
-	params      map[string]string
-	stream      *Stream
+	client   *api
+	endpoint string
+	params   map[string]string
+	stream   *Stream
 }
 
 // New provides new reference for specified Timeline.
@@ -30,25 +27,21 @@ func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret s
 	}
 }
 
-func (tl *Timeline) Init() (e error) {
+// Listen bytes sent from Twitter Streaming API
+// and send completed status to the channel.
+func (tl *Timeline) Listen() (chan *Status, error) {
 	response, e := tl.client.Get(
 		tl.endpoint,
 		tl.params,
 	)
-	tl.response = response
+	if e != nil {
+		return nil, e
+	}
+
 	tl.stream = &Stream{
 		scanner: bufio.NewScanner(response.Body),
 	}
-
-	return e
-}
-
-// Listen bytes sent from Twitter Streaming API
-// and send completed status to the channel.
-func (tl *Timeline) Listen() <-chan *Status {
-	// Delegate channel to parser.
-
-	tl.tweets_chan = make(chan *Status)
+	tweets_chan := make(chan *Status)
 
 	go func() {
 		for {
@@ -56,11 +49,11 @@ func (tl *Timeline) Listen() <-chan *Status {
 			if err != nil {
 				log.Fatal(err)
 			}
-			tl.tweets_chan <- tweet
+			tweets_chan <- tweet
 		}
 	}()
 
-	return tl.tweets_chan
+	return tweets_chan, nil
 }
 
 // Tweet posts status to the timeline
