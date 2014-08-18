@@ -3,6 +3,7 @@ package twistream
 import (
 	"bufio"
 	"encoding/json"
+	"log"
 )
 
 // Stream type
@@ -29,6 +30,7 @@ func (s *Stream) NextTweet() (tweet *Status, err error) {
 			return nil, err
 		}
 		if err = json.Unmarshal(bytes, &tweet); err != nil {
+			log.Println(string(bytes))
 			return nil, err
 		}
 		if tweet.Id > 0 {
