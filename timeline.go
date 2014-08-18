@@ -3,10 +3,11 @@ package twistream
 import "log"
 
 type Timeline struct {
-	client   *api
-	endpoint string
-	params   map[string]string
-	stream   *Stream
+	client    *api
+	endpoint  string
+	params    map[string]string
+	stream    *Stream
+	Reconnect bool
 }
 
 // New provides new reference for specified Timeline.
@@ -19,8 +20,9 @@ func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret s
 			accessToken,
 			accessTokenSecret,
 		),
-		endpoint: endpoint,
-		params:   params,
+		endpoint:  endpoint,
+		params:    params,
+		Reconnect: false,
 	}
 }
 
@@ -31,6 +33,11 @@ func (tl *Timeline) Connect() error {
 	)
 	tl.stream = newStream(response)
 	return e
+}
+
+// TODO: revise reconnect strategy
+func (tl *Timeline) reconnect() error {
+	return tl.Connect()
 }
 
 // Listen bytes sent from Twitter Streaming API
@@ -46,7 +53,13 @@ func (tl *Timeline) Listen() (chan *Status, error) {
 		for {
 			tweet, err := tl.stream.NextTweet()
 			if err != nil {
-				log.Fatal(err)
+				if tl.Reconnect && tl.stream.response.Close {
+					log.Println("connection closed. try reconnect")
+					err = tl.reconnect()
+				}
+				if err != nil {
+					log.Fatal(err)
+				}
 			} else {
 				tweets_chan <- tweet
 			}
