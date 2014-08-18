@@ -60,3 +60,13 @@ type user struct {
 	FollowRequestSent              bool   `json:"follow_request_sent"`
 	Notifications                  bool   `json:"notifications"`
 }
+
+type place struct {
+	Name        string `json:"name"`
+	CountryCode string `json:"country_code"`
+	Country     string `json:"country"`
+	Url         string `json:"url"`
+	Id          string `json:"id"`
+	FullName    string `json:"full_name"`
+	PlaceType   string `json:"place_type"`
+}

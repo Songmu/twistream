@@ -16,7 +16,7 @@ type Status struct {
 	InReplyToScreenName  string   `json:"in_reply_to_screen_name"`
 	User                 user     `json:"user"`
 	Geo                  geo      `json:"geo"`
-	Place                string   `json:"place"`
+	Place                place    `json:"place"`
 	Contributors         []int64  `json:"contributors"`
 	RetweetCount         int      `json:"retweet_count"`
 	FavoriteCount        int      `json:"favorite_count"`
