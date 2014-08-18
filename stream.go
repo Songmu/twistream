@@ -4,23 +4,35 @@ import (
 	"bufio"
 	"encoding/json"
 	"log"
+	"net/http"
 )
 
 // Stream type
 type Stream struct {
-	scanner *bufio.Scanner
+	response *http.Response
+	scanner  *bufio.Scanner
+}
+
+func newStream(response *http.Response) (stream *Stream) {
+	stream = &Stream{
+		response: response,
+	}
+	stream.scanner = bufio.NewScanner(response.Body)
+	return stream
 }
 
 // NextTweet returns new tweet
 func (s *Stream) NextTweet() (tweet *Status, err error) {
-	for s.scanner.Err() == nil {
+	scanner := s.scanner
+
+	for scanner.Err() == nil {
 		var bytes []byte
 		bytes, err = func() ([]byte, error) {
 			for {
-				if !s.scanner.Scan() {
-					return nil, s.scanner.Err()
+				if !scanner.Scan() {
+					return nil, scanner.Err()
 				}
-				bytes := s.scanner.Bytes()
+				bytes := scanner.Bytes()
 				if len(bytes) > 0 {
 					return bytes, nil
 				}
@@ -46,5 +58,5 @@ func (s *Stream) NextTweet() (tweet *Status, err error) {
 			return tweet, nil
 		}
 	}
-	return nil, s.scanner.Err()
+	return nil, scanner.Err()
 }
