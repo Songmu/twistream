@@ -65,7 +65,6 @@ func (s *Stream) NextTweet() (tweet *Status, err error) {
 			friends := new(friends)
 			_ = json.Unmarshal(bytes, &friends)
 			s.friends = friends.Friends
-			log.Println(s.friends)
 		}
 	}
 	return nil, scanner.Err()
