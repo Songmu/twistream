@@ -3,12 +3,13 @@ package twistream_test
 // test
 import (
 	"fmt"
-	. "github.com/otiai10/mint"
-	"github.com/otiai10/twistream"
 	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
+
+	. "github.com/otiai10/mint"
+	"github.com/otiai10/twistream"
 )
 
 var (
@@ -25,6 +26,7 @@ func TestNew(t *testing.T) {
 		CONSUMER_SECRET,
 		ACCESS_TOKEN,
 		ACCESS_TOKEN_SECRET,
+		map[string]string{},
 	)
 	Expect(t, e).ToBe(nil)
 	Expect(t, timeline).TypeOf("*twistream.Timeline")
@@ -52,6 +54,7 @@ func TestTimeline_Tweet(t *testing.T) {
 		CONSUMER_SECRET,
 		ACCESS_TOKEN,
 		ACCESS_TOKEN_SECRET,
+		map[string]string{},
 	)
 
 	status := twistream.Status{

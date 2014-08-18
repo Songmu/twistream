@@ -10,7 +10,7 @@ type Timeline struct {
 }
 
 // New provides new reference for specified Timeline.
-func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret string) (tl *Timeline, e error) {
+func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret string, params map[string]string) (tl *Timeline, e error) {
 
 	tl = &Timeline{
 		client: initAPI(
@@ -23,7 +23,7 @@ func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret s
 
 	response, e := tl.client.Get(
 		endpoint,
-		map[string]string{},
+		params,
 	)
 	tl.response = response
 	tl.stream = make(chan Status)

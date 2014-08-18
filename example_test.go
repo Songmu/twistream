@@ -11,6 +11,7 @@ func ExampleTimeline_Listen(t *testing.T) {
 		"CONSUMER_SECRET",
 		"ACCESS_TOKEN",
 		"ACCESS_TOKEN_SECRET",
+		map[string]string{},
 	)
 	// Practically, you would run this loop by goroutine
 	for {
