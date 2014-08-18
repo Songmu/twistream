@@ -11,6 +11,11 @@ import (
 type Stream struct {
 	response *http.Response
 	scanner  *bufio.Scanner
+	friends  []int64
+}
+
+type friends struct {
+	Friends []int64 `json:"friends"`
 }
 
 func newStream(response *http.Response) (stream *Stream) {
@@ -56,6 +61,11 @@ func (s *Stream) NextTweet() (tweet *Status, err error) {
 		}
 		if tweet.Id > 0 {
 			return tweet, nil
+		} else {
+			friends := new(friends)
+			_ = json.Unmarshal(bytes, &friends)
+			s.friends = friends.Friends
+			log.Println(s.friends)
 		}
 	}
 	return nil, scanner.Err()
