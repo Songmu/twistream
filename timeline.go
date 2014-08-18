@@ -1,9 +1,6 @@
 package twistream
 
-import (
-	"log"
-	"net/http"
-)
+import "log"
 
 type Timeline struct {
 	client   *api
@@ -27,22 +24,22 @@ func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret s
 	}
 }
 
-func (tl *Timeline) Connect() (*http.Response, error) {
-	return tl.client.Get(
+func (tl *Timeline) Connect() error {
+	response, e := tl.client.Get(
 		tl.endpoint,
 		tl.params,
 	)
+	tl.stream = newStream(response)
+	return e
 }
 
 // Listen bytes sent from Twitter Streaming API
 // and send completed status to the channel.
 func (tl *Timeline) Listen() (chan *Status, error) {
-	response, e := tl.Connect()
-	if e != nil {
+	if e := tl.Connect(); e != nil {
 		return nil, e
 	}
 
-	tl.stream = newStream(response)
 	tweets_chan := make(chan *Status)
 
 	go func() {
@@ -50,8 +47,9 @@ func (tl *Timeline) Listen() (chan *Status, error) {
 			tweet, err := tl.stream.NextTweet()
 			if err != nil {
 				log.Fatal(err)
+			} else {
+				tweets_chan <- tweet
 			}
-			tweets_chan <- tweet
 		}
 	}()
 
