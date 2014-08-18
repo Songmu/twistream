@@ -7,27 +7,33 @@ type Timeline struct {
 	response *http.Response
 	stream   chan Status
 	client   *api
+	endpoint string
+	params   map[string]string
 }
 
 // New provides new reference for specified Timeline.
-func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret string, params map[string]string) (tl *Timeline, e error) {
+func New(endpoint, consumerKey, consumerSecret, accessToken, accessTokenSecret string, params map[string]string) *Timeline {
 
-	tl = &Timeline{
+	return &Timeline{
 		client: initAPI(
 			consumerKey,
 			consumerSecret,
 			accessToken,
 			accessTokenSecret,
 		),
+		endpoint: endpoint,
+		params:   params,
 	}
+}
 
+func (tl *Timeline) Init() (e error) {
 	response, e := tl.client.Get(
-		endpoint,
-		params,
+		tl.endpoint,
+		tl.params,
 	)
 	tl.response = response
 	tl.stream = make(chan Status)
-	return
+	return e
 }
 
 // Listen bytes sent from Twitter Streaming API
